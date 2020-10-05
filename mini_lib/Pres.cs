@@ -11,7 +11,7 @@ using System.Net.Sockets;
 namespace mini_lib {
     public class Pres : IDisposable {
 
-        private IEnumerable<Page> records;
+        private IEnumerable<Record> records;
         public List<Page> pages = new List<Page>();
         StreamReader sr = null;
         CsvReader csv = null;
@@ -21,24 +21,22 @@ namespace mini_lib {
         private void BackConstr(Stream StrCsv) {
             sr = new StreamReader(StrCsv);
             csv = new CsvReader(sr, CultureInfo.InvariantCulture);
-            records = csv.GetRecords<Page>();
+            records = csv.GetRecords<Record>();
             if (records != null) {
                 int i = 0;
-                foreach (Page p in records) {
-                    if (p != null) {
+                foreach (Record r in records) {
+                    if (r != null) {
                         Console.Write("record {0}: ", i);
-                        Console.WriteLine(p.ToString());
-                        pages.Add(p.Clone());
+                        Console.WriteLine(r.ToString());
+                        pages.Add(r.GetPage());
                         i++;
                         if (i == Consts.MAXPAGES) break;
                     }
                 }
                 for (; i < Consts.MAXPAGES; i++) {
                     Page p = new Page();
-                    p.idx = i.ToString();
-                    p.Linia1 = "";
-                    p.Linia2 = "";
-                    p.Linia3 = "";
+                    p.idx = i;
+                    p.text = new byte[Consts.MAXCHARS];
                     pages.Add(p);
                     Console.WriteLine("{0} added empty page.", i);
                 }

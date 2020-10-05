@@ -58,36 +58,7 @@ namespace mini_lib {
         public const int MAXCHARSTRIPLE_23B = ((MAXCHARS - MAXCHARSTRIPLE_FB) / 2);
         public const int MAXSPEED = 5;
         public const int MAXTIME = 20;
-
-        static public int line1len(int LinesCount) {
-            switch (LinesCount) {
-                case SINLE_LINE: return MAXCHARS;
-                case DOUBLE_LINE: return MAXCHARSDOUBLE;
-                case DOUBLE_LINE_HORIZONTAL: return MAXCHARSDOUBLEHOR_FB;
-                case TRIPLE_LINE: return MAXCHARSTRIPLE_FB;
-                default: return 0;
-            }
-        }
-
-        static public int line2len(int LinesCount) {
-            switch (LinesCount) {
-                case SINLE_LINE: return 0;
-                case DOUBLE_LINE: return MAXCHARSDOUBLE;
-                case DOUBLE_LINE_HORIZONTAL: return MAXCHARSDOUBLEHOR_2B;
-                case TRIPLE_LINE: return MAXCHARSTRIPLE_23B;
-                default: return 0;
-            }
-        }
-
-        static public int line3len(int LinesCount) {
-            switch (LinesCount) {
-                case SINLE_LINE: return 0;
-                case DOUBLE_LINE: return 0;
-                case DOUBLE_LINE_HORIZONTAL: return 0;
-                case TRIPLE_LINE: return MAXCHARSTRIPLE_23B;
-                default: return 0;
-            }
-        }
+        public const int EFFECTCNT = 15;
 
         static public int GetFontCode(int LinesCount, int f1, int f2, int f3) {
             switch (LinesCount) {
@@ -102,17 +73,24 @@ namespace mini_lib {
                     return (f2 << 16) + f1;
                 case DOUBLE_LINE_HORIZONTAL:
                     f1 %= 8;
-                    f2 %= 8;
-                    return (Consts.fonts_tab[f1] << 16) + Consts.fonts_tab[f2];
+                    f3 %= 8;
+                    return (Consts.fonts_tab[f3] << 16) + Consts.fonts_tab[f1];
                 case TRIPLE_LINE:
-                    f1 %= 8;
+                    f3 %= 8;
+                    f1--;
                     f2--;
-                    f3--;
+                    f1 %= 1;
                     f2 %= 1;
-                    f3 %= 1;
-                    return Consts.fonts_tab[f1] + (f3 << 1) + f2;
-                default: return Consts.FONT1;
+                    return Consts.fonts_tab[f3] + (f2 << 1) + f1;
+                default: return 0;
             }
+        }
+
+        static public UInt32 checksum(UInt32 input) {
+            UInt32 ii = (UInt32)input;
+            UInt32 ch = 0;
+            for (int i = 0; i < 32; i += 8) ch += (ii >> i) & 0xff;
+            return ch;
         }
 
         static public UInt32 checksum(int input) {

@@ -10,7 +10,7 @@ using System.Net;
 using System.Net.Sockets;
 
 namespace mini_lib {
-    public class Page {
+    public class Record {
         [Index(0)]
         public string idx { get; set; }
         [Index(1)]
@@ -32,64 +32,8 @@ namespace mini_lib {
         [Index(9)]
         public string Czcionka3 { get; set; }
 
-        public Page Clone() {
-            Page p = new Page();
-            p.idx = this.idx;
-            p.czas_trwania = this.czas_trwania;
-            p.Efekt = this.Efekt;
-            p.liczba_linii = this.liczba_linii;
-            p.Linia1 = this.Linia1;
-            p.Czcionka1 = this.Czcionka1;
-            p.Linia2 = this.Linia2;
-            p.Czcionka2 = this.Czcionka2;
-            p.Linia3 = this.Linia3;
-            p.Czcionka3 = this.Czcionka3;
-            return p;
-        }
-
-        private int _idx {
-            get {
-                int retval;
-                if (Int32.TryParse(idx, out retval)) return retval;
-                return 0;
-            }
-        }
-
-        private int _czas_trwania {
-            get {
-                int retval;
-                if (Int32.TryParse(czas_trwania, out retval)) {
-                    if (retval > Consts.MAXTIME) retval = Consts.MAXTIME;
-                    return retval;
-                }
-                return 0;
-            }
-        }
-
-        private int _Efekt {
-            get {
-                int retval;
-                if (Int32.TryParse(Efekt, out retval)) return retval;
-                return 0;
-            }
-        }
-
-        private int _liczba_linii {
-            get {
-                int retval;
-                if (Int32.TryParse(liczba_linii, out retval)) return retval - 1;
-                return 0;
-            }
-        }
-
-        private Encoding _enc = null;
-        private Encoding e {
-            get {
-                if (_enc == null) {
-                    _enc = CodePagesEncodingProvider.Instance.GetEncoding(28592);
-                }
-                return _enc;
-            }
+        public override string ToString() {
+            return String.Format("{0}, {1}, {2}, {3}, {4}, {5}, {6}, {6}, {7}, {8}, {9}", idx, czas_trwania, Efekt, liczba_linii, Linia1, Czcionka1, Linia1, Czcionka2, Linia2, Czcionka3, Linia3);
         }
 
         private int _Czcionka1 {
@@ -116,61 +60,125 @@ namespace mini_lib {
             }
         }
 
-        private byte[] l1 = null;
-        private byte[] _Linia1 {
+        private Encoding _enc = null;
+        private Encoding e {
             get {
-                if (l1 == null) {
-                    int lc = Consts.line1len(_liczba_linii);
-                    l1 = new byte[lc];
-                    if (Linia1 != null) {
-                        byte[] tab = e.GetBytes(Linia1);
-                        for (int i = 0; i < Math.Min(tab.Length, lc); i++) l1[i] = tab[i];
-                    }
+                if (_enc == null) {
+                    _enc = CodePagesEncodingProvider.Instance.GetEncoding(28592);
                 }
-                return l1;
+                return _enc;
             }
         }
 
-        private byte[] l2 = null;
-        private byte[] _Linia2 {
-            get {
-                if (l2 == null) {
-                    int lc = Consts.line2len(_liczba_linii);
-                    l2 = new byte[lc];
-                    if (Linia2 != null) {
-                        byte[] tab = e.GetBytes(Linia2);
-                        for (int i = 0; i < Math.Min(tab.Length, lc); i++) l2[i] = tab[i];
-                    }
+        //w tej konwersjii przyjmujemy ze rekord lini3 w triple line i double line hor przechodzi do lini 1 w sterowniku
+        public Page GetPage() {
+            Page p = new Page();
+            int temp;
+            if (Int32.TryParse(idx, out temp)) p.idx = temp; else p.idx = 0;
+            p.czas_trwania = 0;
+            if (Int32.TryParse(czas_trwania, out temp)) {
+                if (temp < Consts.MAXTIME)
+                    p.czas_trwania = temp;
+            }
+            p.Efekt = 0;
+            if (Int32.TryParse(Efekt, out temp)) {
+                if (temp < Consts.EFFECTCNT) {
+                    p.Efekt = temp;
                 }
-                return l2;
+            }
+            p.liczba_linii = Consts.SINLE_LINE;
+            if (Int32.TryParse(liczba_linii, out temp)) {
+                if (temp < 4) {
+                    p.liczba_linii = temp - 1;
+                }
+            }
+            p.font = Consts.GetFontCode(p.liczba_linii, _Czcionka1, _Czcionka2, _Czcionka3);
+            if (p.text == null) p.text = new byte[Consts.MAXCHARS];
+            for (int i = 0; i < p.text.Length; i++) {
+                p.text[i] = 0;
+            }
+            byte[] tab;
+            switch (p.liczba_linii) {
+                case Consts.SINLE_LINE:
+                    tab = e.GetBytes(Linia1);
+                    for (int i = 0; i < Math.Min(tab.Length, p.line1len()); i++) p.text[i] = tab[i];
+                    break;
+                case Consts.DOUBLE_LINE:
+                    tab = e.GetBytes(Linia1);
+                    for (int i = 0; i < Math.Min(tab.Length, p.line1len()); i++)
+                        p.text[i] = tab[i];
+                    tab = e.GetBytes(Linia2);
+                    for (int i = 0; i < Math.Min(tab.Length, p.line2len()); i++)
+                        p.text[i + Consts.MAXCHARSDOUBLE] = tab[i];
+                    break;
+                case Consts.DOUBLE_LINE_HORIZONTAL:
+                    tab = e.GetBytes(Linia3);
+                    for (int i = 0; i < Math.Min(tab.Length, p.line1len()); i++)
+                        p.text[i] = tab[i];
+                    tab = e.GetBytes(Linia1);
+                    for (int i = 0; i < Math.Min(tab.Length, p.line2len()); i++)
+                        p.text[i + Consts.MAXCHARSDOUBLEHOR_FB] = tab[i];
+                    break;
+                case Consts.TRIPLE_LINE:
+                    tab = e.GetBytes(Linia3);
+                    for (int i = 0; i < Math.Min(tab.Length, p.line1len()); i++) p.text[i] = tab[i];
+                    tab = e.GetBytes(Linia1);
+                    for (int i = 0; i < Math.Min(tab.Length, p.line2len()); i++)
+                        p.text[i + Consts.MAXCHARSTRIPLE_FB] = tab[i];
+                    tab = e.GetBytes(Linia2);
+                    for (int i = 0; i < Math.Min(tab.Length, p.line3len()); i++)
+                        p.text[i + Consts.MAXCHARSTRIPLE_FB + Consts.MAXCHARSTRIPLE_23B] = tab[i];
+                    break;
+            }
+            return p;
+        }
+    }
+
+    public class Page {
+        public int idx { get; set; }
+        public int czas_trwania { get; set; }
+        public int Efekt { get; set; }
+        public int liczba_linii { get; set; }
+        public byte[] text { get; set; }
+        public int font { get; set; }
+
+        public int line1len() {
+            switch (liczba_linii) {
+                case Consts.SINLE_LINE: return Consts.MAXCHARS;
+                case Consts.DOUBLE_LINE: return Consts.MAXCHARSDOUBLE;
+                case Consts.DOUBLE_LINE_HORIZONTAL: return Consts.MAXCHARSDOUBLEHOR_FB;
+                case Consts.TRIPLE_LINE: return Consts.MAXCHARSTRIPLE_FB;
+                default: return 0;
             }
         }
 
-        private byte[] l3 = null;
-        private byte[] _Linia3 {
-            get {
-                if (l3 == null) {
-                    int lc = Consts.line3len(_liczba_linii);
-                    l3 = new byte[lc];
-                    if (Linia3 != null) {
-                        byte[] tab = e.GetBytes(Linia3);
-                        for (int i = 0; i < Math.Min(tab.Length, lc); i++) l3[i] = tab[i];
-                    }
-                }
-                return l3;
+        public int line2len() {
+            switch (liczba_linii) {
+                case Consts.SINLE_LINE: return 0;
+                case Consts.DOUBLE_LINE: return Consts.MAXCHARSDOUBLE;
+                case Consts.DOUBLE_LINE_HORIZONTAL: return Consts.MAXCHARSDOUBLEHOR_2B;
+                case Consts.TRIPLE_LINE: return Consts.MAXCHARSTRIPLE_23B;
+                default: return 0;
+            }
+        }
+
+        public int line3len() {
+            switch (liczba_linii) {
+                case Consts.SINLE_LINE: return 0;
+                case Consts.DOUBLE_LINE: return 0;
+                case Consts.DOUBLE_LINE_HORIZONTAL: return 0;
+                case Consts.TRIPLE_LINE: return Consts.MAXCHARSTRIPLE_23B;
+                default: return 0;
             }
         }
 
         public UInt32 GetChecksum() {
             UInt32 ch = 0;
-            ch += Consts.checksum(_liczba_linii);
-            ch += Consts.checksum(_Efekt);
-            ch += Consts.checksum(_czas_trwania);
-            if (_Linia1 != null) ch += Consts.checksum(_Linia1);
-            if (_Linia2 != null) ch += Consts.checksum(_Linia2);
-            if (_Linia3 != null) ch += Consts.checksum(_Linia3);
-            int font_code = Consts.GetFontCode(_liczba_linii, _Czcionka1, _Czcionka2, _Czcionka3);
-            ch += Consts.checksum(font_code);
+            ch += Consts.checksum(liczba_linii);
+            ch += Consts.checksum(Efekt);
+            ch += Consts.checksum(czas_trwania);
+            if (text != null) ch += Consts.checksum(text);
+            ch += Consts.checksum(font);
             return ch;
         }
 
@@ -181,28 +189,12 @@ namespace mini_lib {
         //returns checksum
         public void Serialise(BinaryWriter bw) {
             if (bw != null) {
-                bw.Write(_liczba_linii);
-                bw.Write(_Efekt);
-                bw.Write(_czas_trwania);
-                bw.Write(_Linia1);
-                switch (_liczba_linii) {
-                    case Consts.DOUBLE_LINE_HORIZONTAL:
-                    case Consts.DOUBLE_LINE:
-                        bw.Write(_Linia2);
-                        break;
-                    case Consts.TRIPLE_LINE:
-                        bw.Write(_Linia2);
-                        bw.Write(_Linia3);
-                        break;
-                }
-                /* Console.WriteLine("total len is {0}, {1}, {2}, {3}", _Linia1.Length, _Linia2.Length, +_Linia3.Length, _Linia1.Length + _Linia2.Length + _Linia3.Length); */
-                int font_code = Consts.GetFontCode(_liczba_linii, _Czcionka1, _Czcionka2, _Czcionka3);
-                bw.Write(font_code);
+                bw.Write(liczba_linii);
+                bw.Write(Efekt);
+                bw.Write(czas_trwania);
+                bw.Write(text);
+                bw.Write(font);
             }
-        }
-
-        public override string ToString() {
-            return String.Format("{0}, {1}, {2}, {3}, {4}, {5}, {6}, {6}, {7}, {8}, {9}", idx, czas_trwania, Efekt, liczba_linii, Linia1, Czcionka1, Linia1, Czcionka2, Linia2, Czcionka3, Linia3);
         }
     }
 }
