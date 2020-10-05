@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net.Sockets;
+using System.Threading.Tasks;
 /* using System.Collections.Generic; */
 /* using CsvHelper; */
 /* using CsvHelper.Configuration.Attributes; */
@@ -60,53 +61,59 @@ namespace mini_lib {
             }
         }
 
-        private void SendString(string request) {
-            try {
+        private async Task SendStringAsync(string request) {
+            await Task.Run(() => {
                 lock (TransferLocker) {
-                    client = new TcpClient(ip, cmdport);
-                    Stream netStream = client.GetStream();
-                    using (BinaryWriter sw = new BinaryWriter(netStream)) {
-                        sw.Write(request);
+                    try {
+                        client = new TcpClient(ip, cmdport);
+                        Stream netStream = client.GetStream();
+                        using (BinaryWriter sw = new BinaryWriter(netStream)) {
+                            sw.Write(request);
+                        }
+                    } catch { } finally {
+                        CloseCommandConn();
                     }
+                    System.Threading.Thread.Sleep(500);
                 }
-            } catch { } finally {
-                CloseCommandConn();
-            }
+            });
         }
 
-        public void SendPres(Pres pres) {
-            try {
+        public async Task SendPresAsync(Pres pres) {
+            await Task.Run(() => {
                 lock (TransferLocker) {
-                    client = new TcpClient(ip, cmdport);
-                    Stream netStream = client.GetStream();
-                    using (BinaryWriter sw = new BinaryWriter(netStream)) {
-                        pres.Serialise(sw);
+                    try {
+                        client = new TcpClient(ip, cmdport);
+                        Stream netStream = client.GetStream();
+                        using (BinaryWriter sw = new BinaryWriter(netStream)) {
+                            pres.Serialise(sw);
+                        }
+                    } catch { } finally {
+                        CloseCommandConn();
                     }
+                    System.Threading.Thread.Sleep(500);
                 }
-            } catch { } finally {
-                CloseCommandConn();
-            }
+            });
         }
 
-        public void SendContrast(int k) {
-            SendString(create_request(contrast_tag, k.ToString()));
+        public async Task SendContrastAsync(int k) {
+            await SendStringAsync(create_request(contrast_tag, k.ToString()));
         }
 
-        public void SendNightContrast(int k) {
-            SendString(create_request(nightcontrast_tag, k.ToString()));
+        public async Task SendNightContrastAsync(int k) {
+            await SendStringAsync(create_request(nightcontrast_tag, k.ToString()));
         }
 
-        public void SendStandbyTime(int disH, int disM, int enaH, int enaM) {
-            SendString(create_request(nightcontrast_tag, string.Format("{0};{1};{2};{3}", disH, disM, enaH, enaM)));
+        public async Task SendStandbyTimeAsync(int disH, int disM, int enaH, int enaM) {
+            await SendStringAsync(create_request(standby_tag, string.Format("{0};{1};{2};{3}", disH, disM, enaH, enaM)));
         }
 
-        public void SendPin(string pin) {
+        public async Task SendPinAsync(string pin) {
             if (pin.Length == 4) {
-                SendString(create_request(pin_tag, pin));
+                await SendStringAsync(create_request(pin_tag, pin));
             }
         }
 
-        public void SendTime() {
+        public async Task SendTimeAsync() {
             int year, month, dom, hour, min, sec;
             year = DateTime.Now.Year;
             month = DateTime.Now.Month;
@@ -115,16 +122,16 @@ namespace mini_lib {
             min = DateTime.Now.Minute;
             sec = DateTime.Now.Second;
             string time_representation = string.Format("{0};{1};{2};{3};{4};{5}", year, month, dom, hour, min, sec);
-            SendString(create_request(time_tag, time_representation));
+            await SendStringAsync(create_request(time_tag, time_representation));
         }
 
-        public void SendNetConf(string ip, string ma, string gw) {
+        public async Task SendNetConfAsync(string ip, string ma, string gw) {
             string net_conf_representation = string.Format("{0};{1};{2}", ip, ma, gw);
-            SendString(create_request(net_tag, net_conf_representation));
+            await SendStringAsync(create_request(net_tag, net_conf_representation));
         }
 
-        public void SendPageNr(int PageNr) {
-            SendString(create_request(page_tag, PageNr.ToString()));
+        public async Task SendPageNrAsync(int PageNr) {
+            await SendStringAsync(create_request(page_tag, PageNr.ToString()));
         }
     }
 }
