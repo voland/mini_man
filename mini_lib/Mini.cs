@@ -17,6 +17,7 @@ namespace mini_lib {
         private string standby_tag = "standby";
         private string pin_tag = "pin";
         private string net_tag = "net";
+        private string page_tag = "page";
 
         private string create_request(string tag, string content) {
             return string.Format("<{0}>{1}</{0}>", tag, content);
@@ -120,6 +121,10 @@ namespace mini_lib {
         public void SendNetConf(string ip, string ma, string gw) {
             string net_conf_representation = string.Format("{0};{1};{2}", ip, ma, gw);
             SendString(create_request(net_tag, net_conf_representation));
+        }
+
+        public void SendPageNr(int PageNr) {
+            SendString(create_request(page_tag, PageNr.ToString()));
         }
     }
 }
