@@ -14,7 +14,9 @@ namespace mini_lib {
                 }
                 return _enc;
             }
+            set {
+                _enc = value;
+            }
         }
-
     }
 }
