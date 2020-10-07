@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 
 namespace mini_lib {
@@ -7,7 +8,9 @@ namespace mini_lib {
         static public Encoding e {
             get {
                 if (_enc == null) {
-                    _enc = CodePagesEncodingProvider.Instance.GetEncoding(28592);
+                    _enc = Encoding.GetEncoding(28592);
+                    if (_enc == null)
+                        _enc = CodePagesEncodingProvider.Instance.GetEncoding(28592);
                 }
                 return _enc;
             }

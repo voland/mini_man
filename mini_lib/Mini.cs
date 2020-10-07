@@ -75,7 +75,7 @@ namespace mini_lib {
             Task t = Task.Run(() => {
                 lock (TransferLocker) {
                     try {
-                        Console.WriteLine("creating clitent tcp for{0}:{1}", ip, cmdport);
+                        Console.WriteLine("creating clitent tcp for {0}:{1} request is {2}", ip, cmdport, request);
                         client = new TcpClient(ip, cmdport);
                         using (Stream netStream = client.GetStream()) {
                             byte[] array = Enc.e.GetBytes(request);
@@ -103,13 +103,10 @@ namespace mini_lib {
                                 client = new TcpClient(ip, cmdport);
                                 Stream netStream = client.GetStream();
                                 ms.Seek(0, SeekOrigin.Begin);
-                                int b;
-                                int i = 0;
-                                while ((b = ms.ReadByte()) > -1) {
-                                    i++;
-                                    netStream.WriteByte((byte)b);
-                                }
-                                Console.WriteLine("written {0} bytes", i);
+                                byte[] array = new byte[ms.Length];
+                                ms.Read(array, 0, (int)Math.Min(array.Length, ms.Length));
+								Console.WriteLine("length of array is {0}", array.Length);
+                                netStream.Write(array, 0, array.Length);
                                 System.Threading.Thread.Sleep(500);
                             }
                         }
@@ -123,7 +120,6 @@ namespace mini_lib {
         }
 
         public async Task SendContrastAsync(int k) {
-            Console.WriteLine("sending contrast1");
             await SendStringAsync(create_request(contrast_tag, k.ToString()));
         }
 
