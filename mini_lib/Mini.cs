@@ -2,7 +2,7 @@
 using System.IO;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-/* using System.Collections.Generic; */
+using System.Collections.Generic;
 /* using CsvHelper; */
 /* using CsvHelper.Configuration.Attributes; */
 /* using System.Globalization; */
@@ -27,7 +27,7 @@ namespace mini_lib {
         private string ip;
 
         public Mini() {
-            ip = "192.168.8.1";
+            ip = "192.168.4.1";
         }
 
         public Mini(string ip) {
@@ -61,41 +61,69 @@ namespace mini_lib {
             }
         }
 
+        public List<Task> StartedTasks = new List<Task>();
+
+        public void AwaitAllTasksFinished() {
+            foreach (Task t in StartedTasks) {
+                if (t != null) {
+                    while (t.Status == TaskStatus.Running) ;
+                }
+            }
+        }
+
         private async Task SendStringAsync(string request) {
-            await Task.Run(() => {
+            Task t = Task.Run(() => {
                 lock (TransferLocker) {
                     try {
+                        Console.WriteLine("creating clitent tcp for{0}:{1}", ip, cmdport);
                         client = new TcpClient(ip, cmdport);
-                        Stream netStream = client.GetStream();
-                        using (BinaryWriter sw = new BinaryWriter(netStream)) {
-                            sw.Write(request);
+                        using (Stream netStream = client.GetStream()) {
+                            byte[] array = Enc.e.GetBytes(request);
+                            netStream.Write(array, 0, array.Length);
+                            System.Threading.Thread.Sleep(500);
                         }
-                    } catch { } finally {
+                    } catch (Exception e) {
+                        Console.WriteLine(e.Message);
+                    } finally {
                         CloseCommandConn();
                     }
-                    System.Threading.Thread.Sleep(500);
                 }
             });
+            StartedTasks.Add(t);
+            await t;
         }
 
         public async Task SendPresAsync(Pres pres) {
-            await Task.Run(() => {
+            Task t = Task.Run(() => {
                 lock (TransferLocker) {
                     try {
-                        client = new TcpClient(ip, cmdport);
-                        Stream netStream = client.GetStream();
-                        using (BinaryWriter sw = new BinaryWriter(netStream)) {
-                            pres.Serialise(sw);
+                        using (MemoryStream ms = new MemoryStream()) {
+                            using (BinaryWriter bw = new BinaryWriter(ms)) {
+                                pres.Serialise(bw);
+                                client = new TcpClient(ip, cmdport);
+                                Stream netStream = client.GetStream();
+                                ms.Seek(0, SeekOrigin.Begin);
+                                int b;
+                                int i = 0;
+                                while ((b = ms.ReadByte()) > -1) {
+                                    i++;
+                                    netStream.WriteByte((byte)b);
+                                }
+                                Console.WriteLine("written {0} bytes", i);
+                                System.Threading.Thread.Sleep(500);
+                            }
                         }
-                    } catch { } finally {
+                    } catch (Exception e) { Console.WriteLine(e.Message); } finally {
                         CloseCommandConn();
                     }
-                    System.Threading.Thread.Sleep(500);
                 }
             });
+            StartedTasks.Add(t);
+            await t;
         }
 
         public async Task SendContrastAsync(int k) {
+            Console.WriteLine("sending contrast1");
             await SendStringAsync(create_request(contrast_tag, k.ToString()));
         }
 

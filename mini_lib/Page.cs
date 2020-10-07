@@ -60,16 +60,6 @@ namespace mini_lib {
             }
         }
 
-        private Encoding _enc = null;
-        private Encoding e {
-            get {
-                if (_enc == null) {
-                    _enc = CodePagesEncodingProvider.Instance.GetEncoding(28592);
-                }
-                return _enc;
-            }
-        }
-
         //w tej konwersjii przyjmujemy ze rekord lini3 w triple line i double line hor przechodzi do lini 1 w sterowniku
         public Page GetPage() {
             Page p = new Page();
@@ -100,32 +90,32 @@ namespace mini_lib {
             byte[] tab;
             switch (p.liczba_linii) {
                 case Consts.SINLE_LINE:
-                    tab = e.GetBytes(Linia1);
+                    tab = Enc.e.GetBytes(Linia1);
                     for (int i = 0; i < Math.Min(tab.Length, p.line1len()); i++) p.text[i] = tab[i];
                     break;
                 case Consts.DOUBLE_LINE:
-                    tab = e.GetBytes(Linia1);
+                    tab = Enc.e.GetBytes(Linia1);
                     for (int i = 0; i < Math.Min(tab.Length, p.line1len()); i++)
                         p.text[i] = tab[i];
-                    tab = e.GetBytes(Linia2);
+                    tab = Enc.e.GetBytes(Linia2);
                     for (int i = 0; i < Math.Min(tab.Length, p.line2len()); i++)
                         p.text[i + Consts.MAXCHARSDOUBLE] = tab[i];
                     break;
                 case Consts.DOUBLE_LINE_HORIZONTAL:
-                    tab = e.GetBytes(Linia3);
+                    tab = Enc.e.GetBytes(Linia3);
                     for (int i = 0; i < Math.Min(tab.Length, p.line1len()); i++)
                         p.text[i] = tab[i];
-                    tab = e.GetBytes(Linia1);
+                    tab = Enc.e.GetBytes(Linia1);
                     for (int i = 0; i < Math.Min(tab.Length, p.line2len()); i++)
                         p.text[i + Consts.MAXCHARSDOUBLEHOR_FB] = tab[i];
                     break;
                 case Consts.TRIPLE_LINE:
-                    tab = e.GetBytes(Linia3);
+                    tab = Enc.e.GetBytes(Linia3);
                     for (int i = 0; i < Math.Min(tab.Length, p.line1len()); i++) p.text[i] = tab[i];
-                    tab = e.GetBytes(Linia1);
+                    tab = Enc.e.GetBytes(Linia1);
                     for (int i = 0; i < Math.Min(tab.Length, p.line2len()); i++)
                         p.text[i + Consts.MAXCHARSTRIPLE_FB] = tab[i];
-                    tab = e.GetBytes(Linia2);
+                    tab = Enc.e.GetBytes(Linia2);
                     for (int i = 0; i < Math.Min(tab.Length, p.line3len()); i++)
                         p.text[i + Consts.MAXCHARSTRIPLE_FB + Consts.MAXCHARSTRIPLE_23B] = tab[i];
                     break;

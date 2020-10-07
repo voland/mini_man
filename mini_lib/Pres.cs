@@ -2,11 +2,11 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using CsvHelper;
-using CsvHelper.Configuration.Attributes;
+/* using CsvHelper.Configuration.Attributes; */
 using System.Globalization;
-using System.Text;
-using System.Net;
-using System.Net.Sockets;
+/* using System.Text; */
+/* using System.Net; */
+/* using System.Net.Sockets; */
 
 namespace mini_lib {
     public class Pres : IDisposable {
@@ -63,21 +63,11 @@ namespace mini_lib {
             return 8 + Consts.MAXPAGES * Page.GetSize();
         }
 
-        private Encoding _enc = null;
-        private Encoding e {
-            get {
-                if (_enc == null) {
-                    _enc = CodePagesEncodingProvider.Instance.GetEncoding(28592);
-                }
-                return _enc;
-            }
-        }
-
         public void Serialise(BinaryWriter bw) {
             string begin = string.Format("<sPresentation Size=\"{0}\" Checksum=\"{1}\">", GetSize(), GetChecksum());
             string end = "</sPresentation>";
-            byte[] begin_bytes = e.GetBytes(begin);
-            byte[] end_bytes = e.GetBytes(end);
+            byte[] begin_bytes = Enc.e.GetBytes(begin);
+            byte[] end_bytes = Enc.e.GetBytes(end);
             bw.Write(begin_bytes);
             bw.Write(Consts.MAXPAGES);
             if (bw != null) {

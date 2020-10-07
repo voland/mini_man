@@ -1,5 +1,6 @@
 ﻿using System;
 using mini_lib;
+using System.Threading.Tasks;
 
 namespace miniman {
     class Program {
@@ -15,9 +16,11 @@ namespace miniman {
                 Console.WriteLine("usage: miniman [address ip] [command] [argument] sends command to mini device");
                 Console.WriteLine("");
                 Console.WriteLine("command:");
-                Console.WriteLine("    slides          sends slides to device         ");
-                Console.WriteLine("    contrast        sends contrast to device       "); ;
-                Console.WriteLine("    night contrast  sends night contrast to device ");
+                Console.WriteLine("    slides          send slides to device         ");
+                Console.WriteLine("    contrast        send contrast to device       "); ;
+                Console.WriteLine("    ncontrast       send night contrast to device ");
+                Console.WriteLine("    slidenr         send sline number to show     ");
+                Console.WriteLine("    time now        set internal cloc to now      ");
                 Console.WriteLine("");
                 Console.WriteLine("argument:");
                 Console.WriteLine("    filename csv");
@@ -25,17 +28,30 @@ namespace miniman {
                 Console.WriteLine("    night contrast value");
                 return;
             } else {
+                Mini mini = new Mini();
                 switch (args[0]) {
                     case "slides":
                         string filename = args[1];
                         Pres mp = new Pres(filename);
-                        mp.SaveToBinFile("out.bin");
+						mini.SendPresAsync(mp);
                         break;
-                    case "nightcontrast":
+                    case "ncontrast":
+                        int night_contrast = -1;
+                        if (Int32.TryParse(args[1], out night_contrast)) {
+                            if (night_contrast > 0) mini.SendNightContrastAsync(night_contrast);
+                        }
+                        break;
                     case "contrast":
-                        Console.WriteLine("command {0} not supported yet", args[0]);
+                        int contrast = -1;
+                        if (Int32.TryParse(args[1], out contrast)) {
+                            if (contrast > 0) mini.SendContrastAsync(contrast);
+                        }
+                        break;
+                    case "time":
+						mini.SendTimeAsync();
                         break;
                 }
+				mini.AwaitAllTasksFinished();
             }
         }
     }

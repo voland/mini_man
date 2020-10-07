@@ -1,5 +1,6 @@
-
 tags
-.vscode/launch.json
-.vscode/tasks.json
+.vscode/*
+.vs/*
 *bin
+mini_lib/.Mini.cs.swo
+Session.vim
