@@ -12,13 +12,27 @@ using System.Collections.Generic;
 namespace mini_lib {
     public class Mini {
 
-        private string contrast_tag = "contrast";
-        private string nightcontrast_tag = "nightcontrast";
+        private string contrast_tag = "cont";
+        private string nightcontrast_tag = "ncon";
         private string time_tag = "time";
-        private string standby_tag = "standby";
+        private string standby_tag = "stby";
         private string pin_tag = "pin";
         private string net_tag = "net";
         private string page_tag = "page";
+        private string begin_of_transmition = "<data>";
+        private string end_of_transmition = "</data>";
+
+        private byte[] bot {
+            get {
+                return Enc.e.GetBytes(begin_of_transmition);
+            }
+        }
+
+        private byte[] eot {
+            get {
+                return Enc.e.GetBytes(end_of_transmition);
+            }
+        }
 
         private string create_request(string tag, string content) {
             return string.Format("<{0}>{1}</{0}>", tag, content);
@@ -39,20 +53,6 @@ namespace mini_lib {
         public static object TransferLocker = new object();
 
         private static int cmdport = 2323;
-
-        private void SendData() {
-            try {
-                lock (TransferLocker) {
-                    client = new TcpClient(ip, cmdport);
-                    Stream netStream = client.GetStream();
-                    using (BinaryWriter sw = new BinaryWriter(netStream)) {
-
-                    }
-                }
-            } catch { } finally {
-                CloseCommandConn();
-            }
-        }
 
         private void CloseCommandConn() {
             if (client != null) {
@@ -79,7 +79,9 @@ namespace mini_lib {
                         client = new TcpClient(ip, cmdport);
                         using (Stream netStream = client.GetStream()) {
                             byte[] array = Enc.e.GetBytes(request);
+                            netStream.Write(bot, 0, bot.Length);
                             netStream.Write(array, 0, array.Length);
+                            netStream.Write(eot, 0, eot.Length);
                             System.Threading.Thread.Sleep(500);
                         }
                     } catch (Exception e) {
@@ -105,8 +107,9 @@ namespace mini_lib {
                                 ms.Seek(0, SeekOrigin.Begin);
                                 byte[] array = new byte[ms.Length];
                                 ms.Read(array, 0, (int)Math.Min(array.Length, ms.Length));
-								Console.WriteLine("length of array is {0}", array.Length);
+                                netStream.Write(bot, 0, bot.Length);
                                 netStream.Write(array, 0, array.Length);
+                                netStream.Write(eot, 0, eot.Length);
                                 System.Threading.Thread.Sleep(500);
                             }
                         }

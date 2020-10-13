@@ -7,12 +7,10 @@ namespace mini_lib {
         static public Encoding e {
             get {
                 if (_enc == null) {
-                    _enc = Encoding.GetEncoding(28592);
+                    _enc = CodePagesEncodingProvider.Instance.GetEncoding(28592);
                     if (_enc == null)
-                        _enc = CodePagesEncodingProvider.Instance.GetEncoding(28592);
+                        throw new Exception("Can not get encoding try to set \"e\" value externaly like Enc.e = Encoding.GetEncoding(28592);");
                 }
-				if ( _enc == null) 
-					throw new Exception("Can not get encoding try to set \"e\" value externaly like Enc.e = Encoding.GetEncoding(28592);");
                 return _enc;
             }
             set {

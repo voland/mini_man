@@ -64,8 +64,8 @@ namespace mini_lib {
         }
 
         public void Serialise(BinaryWriter bw) {
-            string begin = string.Format("<sPresentation Size=\"{0}\" Checksum=\"{1}\">", GetSize(), GetChecksum());
-            string end = "</sPresentation>";
+            string begin = string.Format("<Pres Size=\"{0}\" Chsu=\"{1}\">", GetSize(), GetChecksum());
+            string end = "</Pres>";
             byte[] begin_bytes = Enc.e.GetBytes(begin);
             byte[] end_bytes = Enc.e.GetBytes(end);
             bw.Write(begin_bytes);
