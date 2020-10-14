@@ -22,6 +22,7 @@ namespace miniman {
             Console.WriteLine("    time now        set internal cloc to now      ");
             Console.WriteLine("    standby <dh>,<dm>,<eh>,<em> standby disable hr:mn, enable hr:mn");
             Console.WriteLine("    string          send custom string");
+            Console.WriteLine("    message <msg>   send message");
             Console.WriteLine("");
             Console.WriteLine("argument:");
             Console.WriteLine("    filename csv");
@@ -85,6 +86,10 @@ namespace miniman {
                         break;
                     case "string":
                         mini.SendCustomStringAsync(args[1]);
+                        break;
+                    case "message":
+						MessageRgb m = new MessageRgb(args[1], 0xeeeeeeee, 3, true);
+                        mini.SendMessageAsync(m);
                         break;
                     default:
 						Console.WriteLine("No such command!");
