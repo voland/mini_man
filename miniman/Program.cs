@@ -17,15 +17,24 @@ namespace miniman {
                 Console.WriteLine("");
                 Console.WriteLine("command:");
                 Console.WriteLine("    slides          send slides to device         ");
-                Console.WriteLine("    contrast        send contrast to device       "); ;
-                Console.WriteLine("    ncontrast       send night contrast to device ");
-                Console.WriteLine("    slidenr         send sline number to show     ");
+                Console.WriteLine("    contrast        send contrast to device (1-10)"); ;
+                Console.WriteLine("    ncontrast       send night contrast to device (1-10)");
+                Console.WriteLine("    page            send page number to show      ");
                 Console.WriteLine("    time now        set internal cloc to now      ");
+                Console.WriteLine("    standby <dh>,<dm>,<eh>,<em> standby disable hr:mn, enable hr:mn");
                 Console.WriteLine("");
                 Console.WriteLine("argument:");
                 Console.WriteLine("    filename csv");
                 Console.WriteLine("    contrast value");
                 Console.WriteLine("    night contrast value");
+                Console.WriteLine("    night contrast value");
+                Console.WriteLine("");
+                Console.WriteLine("examples:");
+                Console.WriteLine("    ./miniman slides slajdy.csv");
+                Console.WriteLine("    ./miniman time now         ");
+                Console.WriteLine("    ./miniman contrast 8       ");
+                Console.WriteLine("    ./miniman slides slajdy.csv");
+                Console.WriteLine("    ./miniman standby 0,0,5,0     ");
                 return;
             } else {
                 Mini mini = new Mini();
@@ -33,7 +42,7 @@ namespace miniman {
                     case "slides":
                         string filename = args[1];
                         Pres mp = new Pres(filename);
-						mini.SendPresAsync(mp);
+                        mini.SendPresAsync(mp);
                         break;
                     case "ncontrast":
                         int night_contrast = -1;
@@ -48,10 +57,29 @@ namespace miniman {
                         }
                         break;
                     case "time":
-						mini.SendTimeAsync();
+                        mini.SendTimeAsync();
+                        break;
+                    case "page":
+                        int page = -1;
+                        if (Int32.TryParse(args[1], out page)) {
+                            if (page > 0) mini.SendPageNrAsync(page);
+                        }
+                        break;
+                    case "standby":
+                        string[] a = args[1].Split(",");
+                        int dh, dm, eh, em;
+                        if (Int32.TryParse(a[0], out dh)) {
+                            if (Int32.TryParse(a[1], out dm)) {
+                                if (Int32.TryParse(a[2], out eh)) {
+                                    if (Int32.TryParse(a[3], out em)) {
+                                        mini.SendStandbyTimeAsync(dh, dm, eh, em);
+                                    }
+                                }
+                            }
+                        }
                         break;
                 }
-				mini.AwaitAllTasksFinished();
+                mini.AwaitAllTasksFinished();
             }
         }
     }
