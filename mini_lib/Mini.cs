@@ -20,6 +20,7 @@ namespace mini_lib {
         private string pin_tag = "pin";
         private string net_tag = "net";
         private string page_tag = "page";
+        private string mesg_tag = "mesg";
         private string begin_of_transmition = "<data>";
         private string end_of_transmition = "</data>";
 
@@ -143,6 +144,12 @@ namespace mini_lib {
             if (pin.Length == 4) {
                 await SendStringAsync(create_request(pin_tag, pin));
             }
+        }
+
+        public async Task SendMessageAsync(MessageRgb msg) {
+			if ( msg!=null){
+                await SendStringAsync(create_request(mesg_tag, msg.ToString()));
+			}
         }
 
         public async Task SendTimeAsync() {

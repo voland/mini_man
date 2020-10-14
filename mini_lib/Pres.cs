@@ -2,11 +2,7 @@ using System;
 using System.IO;
 using System.Collections.Generic;
 using CsvHelper;
-/* using CsvHelper.Configuration.Attributes; */
 using System.Globalization;
-/* using System.Text; */
-/* using System.Net; */
-/* using System.Net.Sockets; */
 
 namespace mini_lib {
     public class Pres : IDisposable {
