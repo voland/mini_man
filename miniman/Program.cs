@@ -4,38 +4,43 @@ using System.Threading.Tasks;
 
 namespace miniman {
     class Program {
+        static void PrintHelp() {
+            Console.WriteLine(" __  __ _       _ __  __                   ");
+            Console.WriteLine("|  \\/  (_)_ __ (_)  \\/  | __ _ _ __        ");
+            Console.WriteLine("| |\\/| | | '_ \\| | |\\/| |/ _` | '_ \\       ");
+            Console.WriteLine("| |  | | | | | | | |  | | (_| | | | |_ _ _ ");
+            Console.WriteLine("|_|  |_|_|_| |_|_|_|  |_|\\__,_|_| |_(_|_|_)");
+            Console.WriteLine("");
+            Console.WriteLine("Mini Manager GilBT");
+            Console.WriteLine("usage: miniman [address ip] [command] [argument] sends command to mini device");
+            Console.WriteLine("");
+            Console.WriteLine("command:");
+            Console.WriteLine("    slides          send slides to device         ");
+            Console.WriteLine("    contrast        send contrast to device (1-10)"); ;
+            Console.WriteLine("    ncontrast       send night contrast to device (1-10)");
+            Console.WriteLine("    page            send page number to show      ");
+            Console.WriteLine("    time now        set internal cloc to now      ");
+            Console.WriteLine("    standby <dh>,<dm>,<eh>,<em> standby disable hr:mn, enable hr:mn");
+            Console.WriteLine("    string          send custom string");
+            Console.WriteLine("");
+            Console.WriteLine("argument:");
+            Console.WriteLine("    filename csv");
+            Console.WriteLine("    contrast value");
+            Console.WriteLine("    night contrast value");
+            Console.WriteLine("    night contrast value");
+            Console.WriteLine("");
+            Console.WriteLine("examples:");
+            Console.WriteLine("    ./miniman slides slajdy.csv");
+            Console.WriteLine("    ./miniman time now         ");
+            Console.WriteLine("    ./miniman contrast 8       ");
+            Console.WriteLine("    ./miniman slides slajdy.csv");
+            Console.WriteLine("    ./miniman standby 0,0,5,0     ");
+            return;
+        }
+
         static void Main(string[] args) {
             if (args.Length != 2) {
-                Console.WriteLine(" __  __ _       _ __  __                   ");
-                Console.WriteLine("|  \\/  (_)_ __ (_)  \\/  | __ _ _ __        ");
-                Console.WriteLine("| |\\/| | | '_ \\| | |\\/| |/ _` | '_ \\       ");
-                Console.WriteLine("| |  | | | | | | | |  | | (_| | | | |_ _ _ ");
-                Console.WriteLine("|_|  |_|_|_| |_|_|_|  |_|\\__,_|_| |_(_|_|_)");
-                Console.WriteLine("");
-                Console.WriteLine("Mini Manager GilBT");
-                Console.WriteLine("usage: miniman [address ip] [command] [argument] sends command to mini device");
-                Console.WriteLine("");
-                Console.WriteLine("command:");
-                Console.WriteLine("    slides          send slides to device         ");
-                Console.WriteLine("    contrast        send contrast to device (1-10)"); ;
-                Console.WriteLine("    ncontrast       send night contrast to device (1-10)");
-                Console.WriteLine("    page            send page number to show      ");
-                Console.WriteLine("    time now        set internal cloc to now      ");
-                Console.WriteLine("    standby <dh>,<dm>,<eh>,<em> standby disable hr:mn, enable hr:mn");
-                Console.WriteLine("");
-                Console.WriteLine("argument:");
-                Console.WriteLine("    filename csv");
-                Console.WriteLine("    contrast value");
-                Console.WriteLine("    night contrast value");
-                Console.WriteLine("    night contrast value");
-                Console.WriteLine("");
-                Console.WriteLine("examples:");
-                Console.WriteLine("    ./miniman slides slajdy.csv");
-                Console.WriteLine("    ./miniman time now         ");
-                Console.WriteLine("    ./miniman contrast 8       ");
-                Console.WriteLine("    ./miniman slides slajdy.csv");
-                Console.WriteLine("    ./miniman standby 0,0,5,0     ");
-                return;
+                PrintHelp();
             } else {
                 Mini mini = new Mini();
                 switch (args[0]) {
@@ -77,6 +82,13 @@ namespace miniman {
                                 }
                             }
                         }
+                        break;
+                    case "string":
+                        mini.SendCustomStringAsync(args[1]);
+                        break;
+                    default:
+						Console.WriteLine("No such command!");
+						PrintHelp();
                         break;
                 }
                 mini.AwaitAllTasksFinished();

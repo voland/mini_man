@@ -16,6 +16,7 @@ namespace mini_lib {
         private string nightcontrast_tag = "ncon";
         private string time_tag = "time";
         private string standby_tag = "stby";
+        private string custom_data_tag = "cuda";
         private string pin_tag = "pin";
         private string net_tag = "net";
         private string page_tag = "page";
@@ -128,6 +129,10 @@ namespace mini_lib {
 
         public async Task SendNightContrastAsync(int k) {
             await SendStringAsync(create_request(nightcontrast_tag, k.ToString()));
+        }
+
+        public async Task SendCustomStringAsync(string cd) {
+            await SendStringAsync(create_request(custom_data_tag, cd));
         }
 
         public async Task SendStandbyTimeAsync(int disH, int disM, int enaH, int enaM) {
