@@ -13,11 +13,11 @@ using System.Text.Json.Serialization;
 namespace mini_lib {
     public class MessageRgb {
         public string message { set; get; }
-        public UInt32 color { set; get; }
+        public int color { set; get; }
         public int showtime { set; get; }
         public bool bell { set; get; }
 
-        public MessageRgb(string message, UInt32 color, int showtime, bool bell) {
+        public MessageRgb(string message, int color, int showtime, bool bell) {
             this.message = message;
             this.color = color;
             this.showtime = showtime;
