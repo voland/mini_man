@@ -88,7 +88,7 @@ namespace miniman {
                         mini.SendCustomStringAsync(args[1]);
                         break;
                     case "message":
-						MessageRgb m = new MessageRgb(args[1], 0xeeeeeeee, 3, true);
+						MessageRgb m = new MessageRgb(args[1], 2, 3, true);
                         mini.SendMessageAsync(m);
                         break;
                     default:
