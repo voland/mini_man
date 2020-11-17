@@ -24,8 +24,10 @@ namespace mini_lib {
             this.bell = bell;
         }
 
-		public override string ToString(){
-			return JsonSerializer.Serialize(this);
-		}
+        public override string ToString() {
+            JsonSerializerOptions jso = new JsonSerializerOptions();
+            jso.Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping;
+            return JsonSerializer.Serialize(this, jso);
+        }
     }
 }
