@@ -78,7 +78,7 @@ namespace mini_lib {
             }
             p.liczba_linii = Consts.SINLE_LINE;
             if (Int32.TryParse(liczba_linii, out temp)) {
-                if (temp < 4) {
+                if (temp <= 4) {
                     p.liczba_linii = temp - 1;
                 }
             }
