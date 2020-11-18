@@ -17,6 +17,7 @@ namespace mini_lib {
         private void BackConstr(Stream StrCsv) {
             sr = new StreamReader(StrCsv);
             csv = new CsvReader(sr, CultureInfo.InvariantCulture);
+            csv.Configuration.MissingFieldFound = null;
             records = csv.GetRecords<Record>();
             if (records != null) {
                 int i = 0;
