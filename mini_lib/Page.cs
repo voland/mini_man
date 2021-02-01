@@ -84,40 +84,40 @@ namespace mini_lib {
             }
             p.font = Consts.GetFontCode(p.liczba_linii, _Czcionka1, _Czcionka2, _Czcionka3);
             if (p.text == null) p.text = new byte[Consts.MAXCHARS];
-            for (int i = 0; i < p.text.Length; i++) {
-                p.text[i] = 0;
+            //clear buffer
+            for (int k = 0; k < p.text.Length; k++) {
+                p.text[k] = 0;
             }
             byte[] tab;
+            int i = 0;
             switch (p.liczba_linii) {
                 case Consts.SINLE_LINE:
                     tab = Enc.e.GetBytes(Linia1);
-                    for (int i = 0; i < Math.Min(tab.Length, p.line1len()); i++) p.text[i] = tab[i];
+                    for (int j = 0; j < (tab.Length) & (i < (Consts.MAXCHARS - 1));) p.text[i++] = tab[j++];
                     break;
                 case Consts.DOUBLE_LINE:
                     tab = Enc.e.GetBytes(Linia1);
-                    for (int i = 0; i < Math.Min(tab.Length, p.line1len()); i++)
-                        p.text[i] = tab[i];
+                    for (int j = 0; j < (tab.Length) & (i < (Consts.MAXCHARS - 2));) p.text[i++] = tab[j++];
+                    i++;
                     tab = Enc.e.GetBytes(Linia2);
-                    for (int i = 0; i < Math.Min(tab.Length, p.line2len()); i++)
-                        p.text[i + Consts.MAXCHARSDOUBLE] = tab[i];
+                    for (int j = 0; j < (tab.Length) & (i < (Consts.MAXCHARS - 1));) p.text[i++] = tab[j++];
                     break;
                 case Consts.DOUBLE_LINE_HORIZONTAL:
                     tab = Enc.e.GetBytes(Linia3);
-                    for (int i = 0; i < Math.Min(tab.Length, p.line1len()); i++)
-                        p.text[i] = tab[i];
+                    for (int j = 0; j < (tab.Length) & (i < (Consts.MAXCHARS - 2));) p.text[i++] = tab[j++];
+                    i++;
                     tab = Enc.e.GetBytes(Linia1);
-                    for (int i = 0; i < Math.Min(tab.Length, p.line2len()); i++)
-                        p.text[i + Consts.MAXCHARSDOUBLEHOR_FB] = tab[i];
+                    for (int j = 0; j < (tab.Length) & (i < (Consts.MAXCHARS - 1));) p.text[i++] = tab[j++];
                     break;
                 case Consts.TRIPLE_LINE:
                     tab = Enc.e.GetBytes(Linia3);
-                    for (int i = 0; i < Math.Min(tab.Length, p.line1len()); i++) p.text[i] = tab[i];
+                    for (int j = 0; j < (tab.Length) & (i < (Consts.MAXCHARS - 3));) p.text[i++] = tab[j++];
+                    i++;
                     tab = Enc.e.GetBytes(Linia1);
-                    for (int i = 0; i < Math.Min(tab.Length, p.line2len()); i++)
-                        p.text[i + Consts.MAXCHARSTRIPLE_FB] = tab[i];
+                    for (int j = 0; j < (tab.Length) & (i < (Consts.MAXCHARS - 2));) p.text[i++] = tab[j++];
+                    i++;
                     tab = Enc.e.GetBytes(Linia2);
-                    for (int i = 0; i < Math.Min(tab.Length, p.line3len()); i++)
-                        p.text[i + Consts.MAXCHARSTRIPLE_FB + Consts.MAXCHARSTRIPLE_23B] = tab[i];
+                    for (int j = 0; j < (tab.Length) & (i < (Consts.MAXCHARS - 1));) p.text[i++] = tab[j++];
                     break;
             }
             return p;
@@ -131,36 +131,6 @@ namespace mini_lib {
         public int liczba_linii { get; set; }
         public byte[] text { get; set; }
         public int font { get; set; }
-
-        public int line1len() {
-            switch (liczba_linii) {
-                case Consts.SINLE_LINE: return Consts.MAXCHARS;
-                case Consts.DOUBLE_LINE: return Consts.MAXCHARSDOUBLE;
-                case Consts.DOUBLE_LINE_HORIZONTAL: return Consts.MAXCHARSDOUBLEHOR_FB;
-                case Consts.TRIPLE_LINE: return Consts.MAXCHARSTRIPLE_FB;
-                default: return 0;
-            }
-        }
-
-        public int line2len() {
-            switch (liczba_linii) {
-                case Consts.SINLE_LINE: return 0;
-                case Consts.DOUBLE_LINE: return Consts.MAXCHARSDOUBLE;
-                case Consts.DOUBLE_LINE_HORIZONTAL: return Consts.MAXCHARSDOUBLEHOR_2B;
-                case Consts.TRIPLE_LINE: return Consts.MAXCHARSTRIPLE_23B;
-                default: return 0;
-            }
-        }
-
-        public int line3len() {
-            switch (liczba_linii) {
-                case Consts.SINLE_LINE: return 0;
-                case Consts.DOUBLE_LINE: return 0;
-                case Consts.DOUBLE_LINE_HORIZONTAL: return 0;
-                case Consts.TRIPLE_LINE: return Consts.MAXCHARSTRIPLE_23B;
-                default: return 0;
-            }
-        }
 
         public UInt32 GetChecksum() {
             UInt32 ch = 0;

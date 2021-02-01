@@ -51,11 +51,6 @@ namespace mini_lib {
         public const int MAXPAGES = 80;
         public const int MAXCHARS = 160;
         public const int MAX_LINE_MODES = 4;
-        public const int MAXCHARSDOUBLE = (MAXCHARS / 2);
-        public const int MAXCHARSDOUBLEHOR_FB = 16;
-        public const int MAXCHARSDOUBLEHOR_2B = (MAXCHARS - MAXCHARSDOUBLEHOR_FB);
-        public const int MAXCHARSTRIPLE_FB = 8;
-        public const int MAXCHARSTRIPLE_23B = ((MAXCHARS - MAXCHARSTRIPLE_FB) / 2);
         public const int MAXSPEED = 5;
         public const int MAXTIME = 20;
         public const int EFFECTCNT = 15;
