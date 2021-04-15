@@ -21,6 +21,7 @@ namespace mini_lib {
         private string net_tag = "net";
         private string page_tag = "page";
         private string mesg_tag = "mesg";
+        private string netconf_tag = "neco";
         private string begin_of_transmition = "<data>";
         private string end_of_transmition = "</data>";
 
@@ -146,10 +147,17 @@ namespace mini_lib {
             }
         }
 
+        public async Task SendNetConfAsync(string ssid, string pwd) {
+            if ((ssid != null) & (pwd != null)) {
+                string s = $"{ssid}:{pwd}";
+                await SendStringAsync(create_request(net_tag, s));
+            }
+        }
+
         public async Task SendMessageAsync(MessageRgb msg) {
-			if ( msg!=null){
+            if (msg != null) {
                 await SendStringAsync(create_request(mesg_tag, msg.ToString()));
-			}
+            }
         }
 
         public async Task SendTimeAsync() {
