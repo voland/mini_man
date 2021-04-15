@@ -10,6 +10,12 @@ using System.Collections.Generic;
 /* using System.Net; */
 
 namespace mini_lib {
+
+	public enum eWifiMode{
+		ap,
+		sta
+	}
+
     public class Mini {
 
         private string contrast_tag = "cont";
@@ -147,9 +153,9 @@ namespace mini_lib {
             }
         }
 
-        public async Task SendNetConfAsync(string ssid, string pwd) {
+        public async Task SendNetConfAsync(string ssid, string pwd, eWifiMode wt) {
             if ((ssid != null) & (pwd != null)) {
-                string s = $"{ssid}:{pwd}";
+                string s = $"{ssid}:{pwd}:{wt.ToString()}";
                 await SendStringAsync(create_request(net_tag, s));
             }
         }
