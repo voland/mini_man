@@ -153,7 +153,7 @@ namespace mini_lib {
             }
         }
 
-        public async Task SendNetConfAsync(string ssid, string pwd, eWifiMode wt) {
+        public async Task SendWifiConfAsync(string ssid, string pwd, eWifiMode wt) {
             if ((ssid != null) & (pwd != null)) {
                 string s = $"{ssid}:{pwd}:{wt.ToString()}";
                 await SendStringAsync(create_request(net_tag, s));
