@@ -162,8 +162,26 @@ namespace mini_lib {
 
         public async Task SendMessageAsync(MessageRgb msg) {
             if (msg != null) {
-                await SendStringAsync(create_request(mesg_tag, msg.ToString()));
+                string mesedz = convertMessageRgbToString(msg);
+                string request = create_request(mesg_tag, mesedz);
+                await SendStringAsync(request);
             }
+        }
+
+        string convertMessageRgbToString(MessageRgb msg)
+        {
+            //{"message":"9","color":0,"showtime":1,"bell":false}
+            string bellBulVal = msg.bell ? "true" : "false";
+
+            string result = "{";
+            result += $"\"{nameof(msg.message)}\" : \"{msg.message}\" ,";
+            result += $"\"{nameof(msg.color)}\" : {msg.color} ,";
+            result += $"\"{nameof(msg.showtime)}\" : {msg.showtime} ,";
+            result += $"\"{nameof(msg.bell)}\" : {bellBulVal}";
+
+            result += "}";
+
+            return result;
         }
 
         public async Task SendTimeAsync() {
