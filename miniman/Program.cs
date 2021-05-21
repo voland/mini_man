@@ -24,6 +24,7 @@ namespace miniman {
             Console.WriteLine("    wificonf        <ssid>:<key>:<mode> seds ssid password and mode ap/sta (AccressPoint or Station)");
             Console.WriteLine("    string          send custom string");
             Console.WriteLine("    message         <msg>   send message");
+            Console.WriteLine("    listen                  print available miniscreens");
             Console.WriteLine("");
             Console.WriteLine("argument:");
             Console.WriteLine("    filename csv");
@@ -38,12 +39,29 @@ namespace miniman {
             Console.WriteLine("    ./miniman 192.168.4.1 slides slajdy.csv");
             Console.WriteLine("    ./miniman 192.168.4.1 standby 0,0,5,0     ");
             Console.WriteLine("    ./miniman 192.168.4.1 wificonf \"My Home:SecretKey:sta\"");
+            Console.WriteLine("    ./miniman listen");
             return;
         }
 
+		static void OnHaveFoundMini(sConfig c ){
+			Console.WriteLine($"Have found Mini:\n{c.ToString()}");
+		}
+
         static void Main(string[] args) {
             if (args.Length < 3) {
-                PrintHelp();
+                if (args.Length == 1) {
+                    switch (args[0]) {
+                        case "listen":
+							Console.WriteLine("Pres any key to stop!");
+							using ( MiniListener ml = new MiniListener(OnHaveFoundMini)){
+							Console.ReadKey();
+							}
+                            break;
+                        default:
+                            PrintHelp();
+                            break;
+                    }
+                }
             } else {
                 Mini mini = new Mini(args[0]);
                 switch (args[1]) {
@@ -90,15 +108,15 @@ namespace miniman {
                         mini.SendCustomStringAsync(args[2]);
                         break;
                     case "message":
-						MessageRgb m = new MessageRgb(args[2], 2, 3, true);
+                        MessageRgb m = new MessageRgb(args[2], 2, 3, true);
                         mini.SendMessageAsync(m);
                         break;
-					case "wificonf":
-						mini.SendWifiConfAsync(args[2]);
-						break;
+                    case "wificonf":
+                        mini.SendWifiConfAsync(args[2]);
+                        break;
                     default:
-						Console.WriteLine("No such command!");
-						PrintHelp();
+                        Console.WriteLine("No such command!");
+                        PrintHelp();
                         break;
                 }
                 mini.AwaitAllTasksFinished();

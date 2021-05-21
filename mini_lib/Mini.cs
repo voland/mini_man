@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
 using System.Net.Sockets;
+using System.Net;
 using System.Threading.Tasks;
 using System.Collections.Generic;
+using System.Threading;
 /* using CsvHelper; */
 /* using CsvHelper.Configuration.Attributes; */
 /* using System.Globalization; */
@@ -15,6 +17,98 @@ namespace mini_lib {
         ap,
         sta
     }
+
+    public class sConfig {
+        string ip;
+        const int SSID_KEY_LEN = 64;
+        public byte contrast;
+        public byte nightContrast;
+        public byte nightOffHour;
+        public byte nightOffMin;
+        public byte nightOnHour;
+        public byte nightOnMin;
+        public char[] Pin = new char[5];
+        public byte kalibracjaTemp;
+        public byte maxPower;
+        public uint width;
+        public byte GroupSize; //Group size mode czyli czy ma odtwarzac slajdy po kolei czy tez ma wyswietlac w zaleznosci od przycisku
+        public byte beginPage;
+        public byte OnlyFirstLine;
+        public byte rs485_mode;
+        public char[] ssid = new char[SSID_KEY_LEN];
+        public char[] key = new char[SSID_KEY_LEN];
+        public byte wifi_mode;
+
+        public sConfig(string ip) {
+            this.ip = ip;
+        }
+
+        public static sConfig GetFromB64code(byte[] b64code, string ip) {
+            sConfig c = new sConfig(ip);
+            if (b64code.Length == 217) {
+                string b64str = System.Text.Encoding.UTF8.GetString(b64code);
+                b64str = b64str.Remove(0, b64str.IndexOf(':') + 1);
+                byte[] data = System.Convert.FromBase64String(b64str);
+                int i = 0;
+                c.contrast = data[i++];
+                c.nightContrast = data[i++];
+                c.nightOffHour = data[i++];
+                c.nightOffMin = data[i++];
+                c.nightOnHour = data[i++];
+                c.nightOnMin = data[i++];
+            }
+            return c;
+        }
+
+        public override string ToString() {
+            string retval = $"ip {ip}\n";
+            retval += $"contrast = {contrast}\n";
+            retval += $"nightContrast = {nightContrast}\n";
+            return retval;
+        }
+    };
+
+    public class MiniListener : IDisposable {
+        const int port = 6051;
+        bool proces_running = false;
+        ThreadStart _ts;
+        Thread _t;
+        Action<sConfig> _callback_mini_received;
+        UdpClient myUdpClient;
+
+        private void AnnounceRecUdpProces() {
+            try {
+                myUdpClient = new UdpClient(port);
+                IPEndPoint myEndPoint = new IPEndPoint(IPAddress.Any, port);
+                while (proces_running) {
+                    byte[] data = myUdpClient.Receive(ref myEndPoint);
+                    if (_callback_mini_received != null)
+                        _callback_mini_received(sConfig.GetFromB64code(data, myEndPoint.Address.ToString()));
+                }
+            } catch {
+                Console.WriteLine("Exception while UdpReceivement");
+            }
+        }
+
+        public MiniListener(Action<sConfig> CallbackMiniRecevied) {
+            _callback_mini_received = CallbackMiniRecevied;
+            _ts = new ThreadStart(AnnounceRecUdpProces);
+            _t = new Thread(_ts);
+            proces_running = true;
+            _t.Start();
+        }
+
+        public void Dispose() {
+            proces_running = false;
+            if (_t != null) {
+                if (_t.IsAlive) {
+                    _t.Abort();
+                }
+                _t = null;
+            }
+        }
+    }
+
 
     public class Mini {
 
@@ -31,6 +125,8 @@ namespace mini_lib {
         private string wificonf_tag = "wico";
         private string begin_of_transmition = "<data>";
         private string end_of_transmition = "</data>";
+
+        public sConfig config = new sConfig("");
 
         private byte[] bot {
             get {
@@ -156,7 +252,7 @@ namespace mini_lib {
 
         public async Task SendWifiConfAsync(string s) {
             if (s.Contains(":")) {
-				s = s.Replace(@"\!", "!");
+                s = s.Replace(@"\!", "!");
                 await SendStringAsync(create_request(wificonf_tag, s));
             }
         }
@@ -176,8 +272,7 @@ namespace mini_lib {
             }
         }
 
-        string convertMessageRgbToString(MessageRgb msg)
-        {
+        string convertMessageRgbToString(MessageRgb msg) {
             //{"message":"9","color":0,"showtime":1,"bell":false}
             string bellBulVal = msg.bell ? "true" : "false";
 
