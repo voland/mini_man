@@ -20,9 +20,10 @@ namespace miniman {
             Console.WriteLine("    ncontrast       send night contrast to device (1-10)");
             Console.WriteLine("    page            send page number to show      ");
             Console.WriteLine("    time now        set internal cloc to now      ");
-            Console.WriteLine("    standby <dh>,<dm>,<eh>,<em> standby disable hr:mn, enable hr:mn");
+            Console.WriteLine("    standby         <dh>,<dm>,<eh>,<em> standby disable hr:mn, enable hr:mn");
+            Console.WriteLine("    wificonf        <ssid>:<key>:<mode> seds ssid password and mode ap/sta (AccressPoint or Station)");
             Console.WriteLine("    string          send custom string");
-            Console.WriteLine("    message <msg>   send message");
+            Console.WriteLine("    message         <msg>   send message");
             Console.WriteLine("");
             Console.WriteLine("argument:");
             Console.WriteLine("    filename csv");
@@ -31,34 +32,35 @@ namespace miniman {
             Console.WriteLine("    night contrast value");
             Console.WriteLine("");
             Console.WriteLine("examples:");
-            Console.WriteLine("    ./miniman slides slajdy.csv");
-            Console.WriteLine("    ./miniman time now         ");
-            Console.WriteLine("    ./miniman contrast 8       ");
-            Console.WriteLine("    ./miniman slides slajdy.csv");
-            Console.WriteLine("    ./miniman standby 0,0,5,0     ");
+            Console.WriteLine("    ./miniman 192.168.4.1 slides slajdy.csv");
+            Console.WriteLine("    ./miniman 192.168.4.1 time now         ");
+            Console.WriteLine("    ./miniman 192.168.4.1 contrast 8       ");
+            Console.WriteLine("    ./miniman 192.168.4.1 slides slajdy.csv");
+            Console.WriteLine("    ./miniman 192.168.4.1 standby 0,0,5,0     ");
+            Console.WriteLine("    ./miniman 192.168.4.1 wificonf \"My Home:SecretKey:sta\"");
             return;
         }
 
         static void Main(string[] args) {
-            if (args.Length != 2) {
+            if (args.Length < 3) {
                 PrintHelp();
             } else {
-                Mini mini = new Mini();
-                switch (args[0]) {
+                Mini mini = new Mini(args[0]);
+                switch (args[1]) {
                     case "slides":
-                        string filename = args[1];
+                        string filename = args[2];
                         Pres mp = new Pres(filename);
                         mini.SendPresAsync(mp);
                         break;
                     case "ncontrast":
                         int night_contrast = -1;
-                        if (Int32.TryParse(args[1], out night_contrast)) {
+                        if (Int32.TryParse(args[2], out night_contrast)) {
                             if (night_contrast > 0) mini.SendNightContrastAsync(night_contrast);
                         }
                         break;
                     case "contrast":
                         int contrast = -1;
-                        if (Int32.TryParse(args[1], out contrast)) {
+                        if (Int32.TryParse(args[2], out contrast)) {
                             if (contrast > 0) mini.SendContrastAsync(contrast);
                         }
                         break;
@@ -67,12 +69,12 @@ namespace miniman {
                         break;
                     case "page":
                         int page = -1;
-                        if (Int32.TryParse(args[1], out page)) {
+                        if (Int32.TryParse(args[2], out page)) {
                             if (page > 0) mini.SendPageNrAsync(page);
                         }
                         break;
                     case "standby":
-                        string[] a = args[1].Split(",");
+                        string[] a = args[2].Split(",");
                         int dh, dm, eh, em;
                         if (Int32.TryParse(a[0], out dh)) {
                             if (Int32.TryParse(a[1], out dm)) {
@@ -85,12 +87,15 @@ namespace miniman {
                         }
                         break;
                     case "string":
-                        mini.SendCustomStringAsync(args[1]);
+                        mini.SendCustomStringAsync(args[2]);
                         break;
                     case "message":
-						MessageRgb m = new MessageRgb(args[1], 2, 3, true);
+						MessageRgb m = new MessageRgb(args[2], 2, 3, true);
                         mini.SendMessageAsync(m);
                         break;
+					case "wificonf":
+						mini.SendWifiConfAsync(args[2]);
+						break;
                     default:
 						Console.WriteLine("No such command!");
 						PrintHelp();

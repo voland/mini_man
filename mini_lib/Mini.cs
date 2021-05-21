@@ -11,10 +11,10 @@ using System.Collections.Generic;
 
 namespace mini_lib {
 
-	public enum eWifiMode{
-		ap,
-		sta
-	}
+    public enum eWifiMode {
+        ap,
+        sta
+    }
 
     public class Mini {
 
@@ -28,6 +28,7 @@ namespace mini_lib {
         private string page_tag = "page";
         private string mesg_tag = "mesg";
         private string netconf_tag = "neco";
+        private string wificonf_tag = "wico";
         private string begin_of_transmition = "<data>";
         private string end_of_transmition = "</data>";
 
@@ -153,10 +154,17 @@ namespace mini_lib {
             }
         }
 
-        public async Task SendWifiConfAsync(string ssid, string pwd, eWifiMode wt) {
+        public async Task SendWifiConfAsync(string s) {
+            if (s.Contains(":")) {
+				s = s.Replace(@"\!", "!");
+                await SendStringAsync(create_request(wificonf_tag, s));
+            }
+        }
+
+        public async Task SendWifiConfAsync(string ssid, string pwd, eWifiMode wm) {
             if ((ssid != null) & (pwd != null)) {
-                string s = $"{ssid}:{pwd}:{wt.ToString()}";
-                await SendStringAsync(create_request(net_tag, s));
+                string s = $"{ssid}:{pwd}:{wm.ToString()}";
+                await SendStringAsync(create_request(wificonf_tag, s));
             }
         }
 
