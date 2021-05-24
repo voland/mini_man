@@ -21,7 +21,7 @@ namespace miniman {
             Console.WriteLine("    page            send page number to show      ");
             Console.WriteLine("    time now        set internal cloc to now      ");
             Console.WriteLine("    standby         <dh>,<dm>,<eh>,<em> standby disable hr:mn, enable hr:mn");
-            Console.WriteLine("    wificonf        <ssid>:<key>:<mode> seds ssid password and mode ap/sta (AccressPoint or Station)");
+            Console.WriteLine("    wificonf        <ssid>:<key>:<mode> sends ssid password and mode ap/sta (AccressPoint or Station)");
             Console.WriteLine("    string          send custom string");
             Console.WriteLine("    message         <msg>   send message");
             Console.WriteLine("    listen                  print available miniscreens");
@@ -43,24 +43,26 @@ namespace miniman {
             return;
         }
 
-		static void OnHaveFoundMini(sConfig c ){
-			Console.WriteLine($"Have found Mini:\n{c.ToString()}");
-		}
+        static void OnHaveFoundMini(sConfig c) {
+            Console.WriteLine($"Have found Mini:\n{c.ToString()}");
+        }
 
         static void Main(string[] args) {
             if (args.Length < 3) {
                 if (args.Length == 1) {
                     switch (args[0]) {
                         case "listen":
-							Console.WriteLine("Pres any key to stop!");
-							using ( MiniListener ml = new MiniListener(OnHaveFoundMini)){
-							Console.ReadKey();
-							}
+                            Console.WriteLine("Pres any key to stop!");
+                            using (MiniListener ml = new MiniListener(OnHaveFoundMini)) {
+                                Console.ReadKey();
+                            }
                             break;
                         default:
                             PrintHelp();
                             break;
                     }
+                } else {
+                    PrintHelp();
                 }
             } else {
                 Mini mini = new Mini(args[0]);

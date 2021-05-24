@@ -19,7 +19,7 @@ namespace mini_lib {
     }
 
     public class sConfig {
-        string ip;
+        public string ip { set; get; }
         const int SSID_KEY_LEN = 64;
         public byte contrast;
         public byte nightContrast;
@@ -27,7 +27,7 @@ namespace mini_lib {
         public byte nightOffMin;
         public byte nightOnHour;
         public byte nightOnMin;
-        public char[] Pin = new char[5];
+        private char[] _pin = new char[5];
         public byte kalibracjaTemp;
         public byte maxPower;
         public uint width;
@@ -38,6 +38,20 @@ namespace mini_lib {
         public char[] ssid = new char[SSID_KEY_LEN];
         public char[] key = new char[SSID_KEY_LEN];
         public byte wifi_mode;
+
+        string Pin {
+            get {
+                return new String(_pin);
+            }
+            set {
+                char[] tab = value.ToCharArray();
+                _pin[0] = tab[0];
+                _pin[1] = tab[1];
+                _pin[2] = tab[2];
+                _pin[3] = tab[3];
+                _pin[4] = (char)0;
+            }
+        }
 
         public sConfig(string ip) {
             this.ip = ip;
@@ -56,6 +70,21 @@ namespace mini_lib {
                 c.nightOffMin = data[i++];
                 c.nightOnHour = data[i++];
                 c.nightOnMin = data[i++];
+                c._pin[0] = (char)data[i++];
+                c._pin[1] = (char)data[i++];
+                c._pin[2] = (char)data[i++];
+                c._pin[3] = (char)data[i++];
+                c._pin[4] = (char)data[i++];
+                c.kalibracjaTemp = data[i++];
+                c.maxPower = data[i++];
+                c.width = data[i++];
+                c.width += ((uint)data[i++]) << 8;
+                c.width += ((uint)data[i++]) << 16;
+                c.width += ((uint)data[i++]) << 24;
+                c.GroupSize = data[i++];
+                c.beginPage = data[i++];
+                c.OnlyFirstLine = data[i++];
+                c.rs485_mode = data[i++];
             }
             return c;
         }
