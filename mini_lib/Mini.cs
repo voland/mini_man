@@ -240,7 +240,8 @@ namespace mini_lib {
 							array.CopyTo(data, bot.Length);
 							eot.CopyTo(data, bot.Length+array.Length);
                             netStream.Write(data, 0, data.Length);
-                            System.Threading.Thread.Sleep(100);
+                            System.Threading.Thread.Sleep(200);
+                            netStream.Write(data, 0, data.Length);
                         }
                     } catch (Exception e) {
                         Console.WriteLine(e.Message);
