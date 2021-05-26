@@ -14,8 +14,8 @@ using System.Threading;
 namespace mini_lib {
 
     public enum eWifiMode {
-        ap,
-        sta
+        sta,
+        ap
     }
 
     public class sConfig {
@@ -35,9 +35,9 @@ namespace mini_lib {
         public byte beginPage;
         public byte OnlyFirstLine;
         public byte rs485_mode;
-        public char[] ssid = new char[SSID_KEY_LEN];
-        public char[] key = new char[SSID_KEY_LEN];
-        public byte wifi_mode;
+        public char[] _ssid = new char[SSID_KEY_LEN];
+        public char[] _key = new char[SSID_KEY_LEN];
+        public eWifiMode wifi_mode;
 
         string Pin {
             get {
@@ -57,9 +57,21 @@ namespace mini_lib {
             this.ip = ip;
         }
 
+        public string ssid {
+            get {
+                return new String(_ssid);
+            }
+        }
+
+        public string key {
+            get {
+                return new String(_key);
+            }
+        }
+
         public static sConfig GetFromB64code(byte[] b64code, string ip) {
             sConfig c = new sConfig(ip);
-            if (b64code.Length == 217) {
+            if (b64code.Length >= 20) {
                 string b64str = System.Text.Encoding.UTF8.GetString(b64code);
                 b64str = b64str.Remove(0, b64str.IndexOf(':') + 1);
                 byte[] data = System.Convert.FromBase64String(b64str);
@@ -85,6 +97,15 @@ namespace mini_lib {
                 c.beginPage = data[i++];
                 c.OnlyFirstLine = data[i++];
                 c.rs485_mode = data[i++];
+                for (int j = 0; (j < SSID_KEY_LEN) & (i < data.Length); j++) {
+                    c._ssid[j] = (char)data[i++];
+                }
+                for (int j = 0; (j < SSID_KEY_LEN) & (i < data.Length); j++) {
+                    c._key[j] = (char)data[i++];
+                }
+                if (i < data.Length) {
+                    c.wifi_mode = (eWifiMode)data[i];
+                }
             }
             return c;
         }

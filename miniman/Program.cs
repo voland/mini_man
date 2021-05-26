@@ -44,7 +44,7 @@ namespace miniman {
         }
 
         static void OnHaveFoundMini(sConfig c) {
-            Console.WriteLine($"Have found Mini:\n{c.ToString()}");
+            Console.WriteLine($"{DateTime.Now} Have found Mini:\n{c.ToString()}");
         }
 
         static void Main(string[] args) {
