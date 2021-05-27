@@ -235,10 +235,10 @@ namespace mini_lib {
                         client = new TcpClient(ip, cmdport);
                         using (Stream netStream = client.GetStream()) {
                             byte[] array = Enc.e.GetBytes(request);
-							byte[] data = new byte[ bot.Length+array.Length+eot.Length];
-							bot.CopyTo(data, 0);
-							array.CopyTo(data, bot.Length);
-							eot.CopyTo(data, bot.Length+array.Length);
+                            byte[] data = new byte[bot.Length + array.Length + eot.Length];
+                            bot.CopyTo(data, 0);
+                            array.CopyTo(data, bot.Length);
+                            eot.CopyTo(data, bot.Length + array.Length);
                             netStream.Write(data, 0, data.Length);
                             System.Threading.Thread.Sleep(200);
                             netStream.Write(data, 0, data.Length);
@@ -267,14 +267,17 @@ namespace mini_lib {
                                 ms.Seek(0, SeekOrigin.Begin);
                                 byte[] array = new byte[ms.Length];
                                 ms.Read(array, 0, (int)Math.Min(array.Length, ms.Length));
-                                netStream.Write(bot, 0, bot.Length);
-                                netStream.Write(array, 0, array.Length);
-                                netStream.Write(eot, 0, eot.Length);
-                                System.Threading.Thread.Sleep(500);
+                                byte[] data = new byte[bot.Length + array.Length + eot.Length];
+                                bot.CopyTo(data, 0);
+                                array.CopyTo(data, bot.Length);
+                                eot.CopyTo(data, bot.Length + array.Length);
+                                netStream.Write(data, 0, data.Length);
+                                System.Threading.Thread.Sleep(200);
                             }
                         }
                     } catch (Exception e) { Console.WriteLine(e.Message); } finally {
                         CloseCommandConn();
+                        System.Threading.Thread.Sleep(100);
                     }
                 }
             });
